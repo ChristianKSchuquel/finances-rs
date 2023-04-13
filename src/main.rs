@@ -1,7 +1,8 @@
 mod finances;
+#[macro_use] extern crate prettytable;
 use std::env;
 
-use crate::finances::{add, remove};
+use crate::finances::{add, remove, list};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().skip(1).collect();
@@ -13,6 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // on this case arguments must be: Command, Name, Amount
         Some("add") => add(args, file_path).map_err(|e| format!("Error adding to file: {}", e))?,
         Some("rm") => remove(args, file_path).map_err(|e| format!("Error removing from file: {}", e))?,
+        Some("list") => list(file_path).map_err(|e| format!("Error listing from file: {}", e))?,
         Some(s) => panic!("Unknown command: {}", s),
         None => todo!(),
     };
