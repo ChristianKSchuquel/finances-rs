@@ -167,3 +167,16 @@ pub fn list(file_path: String) -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+pub fn clear(file_path: String) -> Result<(), Box<dyn std::error::Error>> {
+    let mut file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .append(true)
+        .open(file_path)?;
+
+    file.set_len(0)?;
+    file.seek(std::io::SeekFrom::Start(0))?;
+    Ok(())
+}
