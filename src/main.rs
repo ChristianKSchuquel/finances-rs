@@ -18,7 +18,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("list") => list(file_path).map_err(|e| format!("Error listing from file: {}", e))?,
         Some("clear") => clear(file_path).map_err(|e| format!("Error clearing file: {}", e))?,
         Some(s) => panic!("Unknown command: {}", s),
-        None => todo!(),
+        None => print!("Finances-rs 
+Usage: '$ fnc <command> [arguments]'
+
+Commands:
+    list:   Shows a table of the contents in the $HOME/.finances.json file
+    add:    Adds an item to the finances file. Ex: '$ fnc add Income 20'
+    rm:     Removes an item from the finances file. Ex: '$ fnc rm 1'
+    clear:  Clears the finances file. Ex: '$ fnc clear'")
     };
 
     Ok(())

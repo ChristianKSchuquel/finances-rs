@@ -1,4 +1,4 @@
-use std::fs::OpenOptions;
+use std::fs::{OpenOptions, File};
 use std::io::{Read, Write, Seek};
 use serde::{Serialize, Deserialize};
 use prettytable::Table;
@@ -15,27 +15,8 @@ pub fn add(args: Vec<String>, file_path: String) -> Result<(), Box<dyn std::erro
         panic!("Expected 3 arguments: Command, Name and Amount");
     }
 
-
-    let mut file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .append(true)
-        .open(file_path)?;
-
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-
-    let mut income_or_expense = match serde_json::from_str::<Vec<IncomeOrExpense>>(&contents) {
-        Ok(v) => v,
-        Err(e) => {
-            if !contents.is_empty() {
-                return Err(format!("Error deserializing file contents: {:?}",e.to_string()).into());
-            } else {
-                vec![]
-            }
-        }
-    };
+    let mut income_or_expense =  get_list(&file_path).unwrap().0;
+    let mut file =  get_list(&file_path).unwrap().1;
 
     let amount_from_args = args[2].clone();
     let amount = if let Ok(val) = amount_from_args.parse::<f32>() {
@@ -65,31 +46,8 @@ pub fn remove(args: Vec<String>, file_path: String) -> Result<(), Box<dyn std::e
         panic!("Expected index");
     }
 
-
-    let mut file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .append(true)
-        .open(file_path)?;
-
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-
-    let mut income_or_expense = match serde_json::from_str::<Vec<IncomeOrExpense>>(&contents) {
-        Ok(v) => v,
-        Err(e) => {
-            if !contents.is_empty() {
-                return Err(format!(
-                        "Error deserializing file contents: {:?}",
-                        e.to_string()
-                        )
-                    .into());
-            } else {
-                vec![]
-            }
-        }
-    };
+    let mut income_or_expense =  get_list(&file_path).unwrap().0;
+    let mut file =  get_list(&file_path).unwrap().1;
     
     let mut index = args[1].parse::<usize>()?;
 
@@ -111,30 +69,7 @@ pub fn remove(args: Vec<String>, file_path: String) -> Result<(), Box<dyn std::e
 }
 
 pub fn list(file_path: String) -> Result<(), Box<dyn std::error::Error>> {
-    let mut file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .append(true)
-        .open(file_path)?;
-
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-
-    let income_or_expense = match serde_json::from_str::<Vec<IncomeOrExpense>>(&contents) {
-        Ok(v) => v,
-        Err(e) => {
-            if !contents.is_empty() {
-                return Err(format!(
-                        "Error deserializing file contents: {:?}",
-                        e.to_string()
-                        )
-                    .into());
-            } else {
-                vec![]
-            }
-        }
-    };
+    let income_or_expense =  get_list(&file_path).unwrap().0;
 
     let mut table = Table::new();
     table.add_row(row![Fyb => "index", "name", "value"]);
@@ -179,4 +114,33 @@ pub fn clear(file_path: String) -> Result<(), Box<dyn std::error::Error>> {
     file.set_len(0)?;
     file.seek(std::io::SeekFrom::Start(0))?;
     Ok(())
+}
+
+fn get_list(file_path: &String) -> Result<(Vec<IncomeOrExpense>, File), Box<dyn std::error::Error>>  {
+    let mut file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .append(true)
+        .open(file_path)?;
+
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+
+    let income_or_expense = match serde_json::from_str::<Vec<IncomeOrExpense>>(&contents) {
+        Ok(v) => v,
+        Err(e) => {
+            if !contents.is_empty() {
+                return Err(format!(
+                        "Error deserializing file contents: {:?}",
+                        e.to_string()
+                        )
+                    .into());
+            } else {
+                vec![]
+            }
+        }
+    };
+
+    Ok((income_or_expense, file))
 }
