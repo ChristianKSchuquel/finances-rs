@@ -15,8 +15,7 @@ pub fn add(args: Vec<String>, file_path: String) -> Result<(), Box<dyn std::erro
         panic!("Expected 3 arguments: Command, Name and Amount");
     }
 
-    let mut income_or_expense =  get_list(&file_path).unwrap().0;
-    let mut file =  get_list(&file_path).unwrap().1;
+    let (mut income_or_expense, mut file) =  get_list(&file_path).unwrap();
 
     let amount_from_args = args[2].clone();
     let amount = if let Ok(val) = amount_from_args.parse::<f32>() {
@@ -46,8 +45,7 @@ pub fn remove(args: Vec<String>, file_path: String) -> Result<(), Box<dyn std::e
         panic!("Expected index");
     }
 
-    let mut income_or_expense =  get_list(&file_path).unwrap().0;
-    let mut file =  get_list(&file_path).unwrap().1;
+    let (mut income_or_expense, mut file) =  get_list(&file_path).unwrap();
     
     let mut index = args[1].parse::<usize>()?;
 
